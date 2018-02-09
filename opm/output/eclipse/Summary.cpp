@@ -177,13 +177,7 @@ template<> constexpr
 measure rate_unit< rt::solvent >() { return measure::gas_surface_rate; }
 
 template<> constexpr
-measure rate_unit< rt::reservoir_water >() { return measure::rate; }
-
-template<> constexpr
-measure rate_unit< rt::reservoir_oil >() { return measure::rate; }
-
-template<> constexpr
-measure rate_unit< rt::reservoir_gas >() { return measure::rate; }
+measure rate_unit< rt::reservoir_volume >() { return measure::rate; }
 
 template< rt phase, bool injection = true >
 inline quantity rate( const fn_args& args ) {
@@ -422,8 +416,7 @@ static const std::unordered_map< std::string, ofun > funs = {
     { "WOIT", mul( rate< rt::oil, injector >, duration ) },
     { "WGIT", mul( rate< rt::gas, injector >, duration ) },
     { "WNIT", mul( rate< rt::solvent, injector >, duration ) },
-    { "WVIT", mul( sum( sum( rate< rt::reservoir_water, injector >, rate< rt::reservoir_oil, injector > ),
-                        rate< rt::reservoir_gas, injector > ), duration ) },
+    { "WVIT", mul( rate< rt::reservoir_volume, injector >, duration ) },
 
     { "WWPR", rate< rt::wat, producer > },
     { "WOPR", rate< rt::oil, producer > },
@@ -434,8 +427,7 @@ static const std::unordered_map< std::string, ofun > funs = {
     { "WGPRF", sub( rate< rt::gas, producer >, rate< rt::dissolved_gas, producer > ) },
     { "WOPRS", rate< rt::vaporized_oil, producer > },
     { "WOPRF", sub (rate < rt::oil, producer >, rate< rt::vaporized_oil, producer > )  },
-    { "WVPR", sum( sum( rate< rt::reservoir_water, producer >, rate< rt::reservoir_oil, producer > ),
-                   rate< rt::reservoir_gas, producer > ) },
+    { "WVPR", rate< rt::reservoir_volume, producer > },
 
     { "WLPR", sum( rate< rt::wat, producer >, rate< rt::oil, producer > ) },
     { "WWPT", mul( rate< rt::wat, producer >, duration ) },
@@ -451,8 +443,7 @@ static const std::unordered_map< std::string, ofun > funs = {
     { "WOPTS", mul( rate< rt::vaporized_oil, producer >, duration )},
     { "WOPTF", sub( mul( rate< rt::oil, producer >, duration ),
                         mul( rate< rt::vaporized_oil, producer >, duration ))},
-    { "WVPT", mul( sum( sum( rate< rt::reservoir_water, producer >, rate< rt::reservoir_oil, producer > ),
-                        rate< rt::reservoir_gas, producer > ), duration ) },
+    { "WVPT", mul( rate< rt::reservoir_volume, producer >, duration ) },
 
     { "WWCT", div( rate< rt::wat, producer >,
                    sum( rate< rt::wat, producer >, rate< rt::oil, producer > ) ) },
@@ -471,14 +462,12 @@ static const std::unordered_map< std::string, ofun > funs = {
     { "GOIR", rate< rt::oil, injector > },
     { "GGIR", rate< rt::gas, injector > },
     { "GNIR", rate< rt::solvent, injector > },
-    { "GVIR", sum( sum( rate< rt::reservoir_water, injector >, rate< rt::reservoir_oil, injector > ),
-                        rate< rt::reservoir_gas, injector > ) },
+    { "GVIR", rate< rt::reservoir_volume, injector > },
     { "GWIT", mul( rate< rt::wat, injector >, duration ) },
     { "GOIT", mul( rate< rt::oil, injector >, duration ) },
     { "GGIT", mul( rate< rt::gas, injector >, duration ) },
     { "GNIT", mul( rate< rt::solvent, injector >, duration ) },
-    { "GVIT", mul( sum( sum( rate< rt::reservoir_water, injector >, rate< rt::reservoir_oil, injector > ),
-                        rate< rt::reservoir_gas, injector > ), duration ) },
+    { "GVIT", mul( rate< rt::reservoir_volume, injector >, duration ) },
 
     { "GWPR", rate< rt::wat, producer > },
     { "GOPR", rate< rt::oil, producer > },
@@ -487,8 +476,7 @@ static const std::unordered_map< std::string, ofun > funs = {
     { "GOPRS", rate< rt::vaporized_oil, producer > },
     { "GOPRF", sub (rate < rt::oil, producer >, rate< rt::vaporized_oil, producer > ) },
     { "GLPR", sum( rate< rt::wat, producer >, rate< rt::oil, producer > ) },
-    { "GVPR", sum( sum( rate< rt::reservoir_water, producer >, rate< rt::reservoir_oil, producer > ),
-                        rate< rt::reservoir_gas, producer > ) },
+    { "GVPR", rate< rt::reservoir_volume, producer > },
 
     { "GWPT", mul( rate< rt::wat, producer >, duration ) },
     { "GOPT", mul( rate< rt::oil, producer >, duration ) },
@@ -500,8 +488,7 @@ static const std::unordered_map< std::string, ofun > funs = {
                     duration ) },
     { "GLPT", mul( sum( rate< rt::wat, producer >, rate< rt::oil, producer > ),
                    duration ) },
-    { "GVPT", mul( sum( sum( rate< rt::reservoir_water, producer >, rate< rt::reservoir_oil, producer > ),
-                        rate< rt::reservoir_gas, producer > ), duration ) },
+    { "GVPT", mul( rate< rt::reservoir_volume, producer >, duration ) },
 
     { "WWPRH", production_history< Phase::WATER > },
     { "WOPRH", production_history< Phase::OIL > },
@@ -598,8 +585,7 @@ static const std::unordered_map< std::string, ofun > funs = {
     { "FOPR", rate< rt::oil, producer > },
     { "FGPR", rate< rt::gas, producer > },
     { "FNPR", rate< rt::solvent, producer > },
-    { "FVPR", sum( sum( rate< rt::reservoir_water, producer>, rate< rt::reservoir_oil, producer >),
-                   rate< rt::reservoir_gas, producer>)},
+    { "FVPR", rate< rt::reservoir_volume, producer> },
     { "FGPRS", rate< rt::dissolved_gas, producer > },
     { "FGPRF", sub( rate< rt::gas, producer >, rate< rt::dissolved_gas, producer > ) },
     { "FOPRS", rate< rt::vaporized_oil, producer > },
@@ -612,8 +598,7 @@ static const std::unordered_map< std::string, ofun > funs = {
     { "FNPT", mul( rate< rt::solvent >, duration ) },
     { "FLPT", mul( sum( rate< rt::wat, producer >, rate< rt::oil, producer > ),
                    duration ) },
-    { "FVPT", mul(sum (sum( rate< rt::reservoir_water, producer>, rate< rt::reservoir_oil, producer >),
-                       rate< rt::reservoir_gas, producer>), duration)},
+    { "FVPT", mul( rate< rt::reservoir_volume, producer>, duration )},
     { "FGPTS", mul( rate< rt::dissolved_gas, producer > , duration )},
     { "FGPTF", mul( sub( rate< rt::gas, producer >, rate< rt::dissolved_gas, producer > ), duration )},
     { "FOPTS", mul( rate< rt::vaporized_oil, producer >, duration ) },
@@ -625,8 +610,7 @@ static const std::unordered_map< std::string, ofun > funs = {
     { "FOIR", rate< rt::oil, injector > },
     { "FGIR", rate< rt::gas, injector > },
     { "FNIR", rate< rt::solvent, injector > },
-    { "FVIR", sum( sum( rate< rt::reservoir_water, injector>, rate< rt::reservoir_oil, injector >),
-                   rate< rt::reservoir_gas, injector>)},
+    { "FVIR", rate< rt::reservoir_volume, injector> },
 
     { "FLIR", sum( rate< rt::wat, injector >, rate< rt::oil, injector > ) },
     { "FWIT", mul( rate< rt::wat, injector >, duration ) },
@@ -635,8 +619,7 @@ static const std::unordered_map< std::string, ofun > funs = {
     { "FNIT", mul( rate< rt::solvent, injector >, duration ) },
     { "FLIT", mul( sum( rate< rt::wat, injector >, rate< rt::oil, injector > ),
                    duration ) },
-    { "FVIT", mul( sum( sum( rate< rt::reservoir_water, injector>, rate< rt::reservoir_oil, injector >),
-                   rate< rt::reservoir_gas, injector>), duration)},
+    { "FVIT", mul( rate< rt::reservoir_volume, injector>, duration)},
 
     { "FWPRH", production_history< Phase::WATER > },
     { "FOPRH", production_history< Phase::OIL > },
